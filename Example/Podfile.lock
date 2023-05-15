@@ -1,0 +1,16 @@
+PODS:
+  - KwiksSystemsPopups (0.1.2)
+
+DEPENDENCIES:
+  - KwiksSystemsPopups (from `../`)
+
+EXTERNAL SOURCES:
+  KwiksSystemsPopups:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  KwiksSystemsPopups: d63ee5c8ccb76235bbe27ab2d5ec06ef3601fbac
+
+PODFILE CHECKSUM: 154ed76d9df1eaf6bafb661e5bdce9c8aa44ff52
+
+COCOAPODS: 1.12.0
