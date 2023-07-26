@@ -44,13 +44,17 @@ class ViewController: UIViewController {
     
     @objc func runPopup() {
         
-        alert = KwiksSystemPopups(presentingViewController: self, popupType: .underThirteen)
-        alert.engagePopup()
+        self.alert = KwiksSystemPopups(presentingViewController: self, popupType: .accessDenied)
+        self.alert = KwiksSystemPopups(presentingViewController: self, header: "Server error (500)", body: "Looks like our systems failed which is impossible because we have Steven - check your device")
+        self.alert.engagePopup()
+        
+        self.alert.callback = { (data) in
+            print("call back engaged")
+        }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-
 }
 

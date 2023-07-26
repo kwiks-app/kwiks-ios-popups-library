@@ -1,5 +1,5 @@
 PODS:
-  - KwiksSystemsPopups (0.1.2)
+  - KwiksSystemsPopups (0.1.5)
 
 DEPENDENCIES:
   - KwiksSystemsPopups (from `../`)
@@ -9,8 +9,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KwiksSystemsPopups: d63ee5c8ccb76235bbe27ab2d5ec06ef3601fbac
+  KwiksSystemsPopups: 650f3bb8069a585007000e4b927db32f7cbc8e27
 
 PODFILE CHECKSUM: 154ed76d9df1eaf6bafb661e5bdce9c8aa44ff52
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1

@@ -10,6 +10,19 @@ import UIKit
 
 public class KwiksSystemPopups : NSObject {
     
+    public enum ResponseType {
+        case dismiss
+        case serverDown
+        case contactSupportEmail
+        case kwiksUnavailable
+        case under13
+        case sendToAppStoreURL
+
+    }
+    //stanley request for callback option
+    public var callback: ((ResponseType) -> Void)?
+    public var responseType = ResponseType.dismiss
+    
     public enum PopupType{
         case underThirteen
         case updateKwiks
@@ -128,7 +141,7 @@ public class KwiksSystemPopups : NSObject {
          return dpp
       }()
     
-    public init(presentingViewController: UIViewController? = nil, popupType : PopupType? = nil) {
+    public init(presentingViewController: UIViewController? = nil, popupType:PopupType? = nil, header:String?=nil, body:String? = nil) {
         super.init()
         
         if presentingViewController != nil && popupType != nil {
@@ -138,230 +151,278 @@ public class KwiksSystemPopups : NSObject {
             self.loadFonts { complete in
                 self.copyDecision(popupType: popupType!)
             }
+            
+        } else if presentingViewController != nil {//steven change
+            self.rootController = presentingViewController
+            self.loadFonts { complete in
+                if body != nil && header != nil {
+                    self.copyDecision(body: body, header: header)
+                } else {
+                    print("handle the error")
+                }
+            }
         }
     }
     
-    public func copyDecision(popupType : PopupType) {
+    public func copyDecision(popupType : PopupType? = nil, body:String? = nil, header:String? = nil) {
         
-        switch popupType {
-            
-        case .underThirteen:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().underAgeIcon)
-            self.headerLabel.text = "Hey! You’re Under 13"
-            self.subHeaderLabel.text = "Please come back when you’re 13. If you entered you’re age incorrectly, please correct it."
-            self.confirmationButton.setTitle("Ok", for: .normal)
-       
-        case .updateKwiks:
+        if popupType == nil {
             self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().kwiksLogo)
-            self.headerLabel.text = "Update Kwiks"
-            self.subHeaderLabel.text = "Kwiks app version is too low. To continue, update to the latest version of the app."
-            self.confirmationButton.setTitle("Update Now", for: .normal)
-        
-        case .ageRestriction:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().kwiksLogo)
-            self.headerLabel.text = "Feature is not available"
-            self.subHeaderLabel.text = "This feature is not available for your account due to the age restriction."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .sendingFailed:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailIcon)
-            self.headerLabel.text = "Sending Failed!"
-            self.subHeaderLabel.text = "Sending Failed. Please try again."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .permissionNeeded:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Permission Needed!"
-            self.subHeaderLabel.text = "Kwiks need to permission to access files and photos."
-            self.confirmationButton.setTitle("Go to settings", for: .normal)
-            
-        case .uploadFailed:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().uploadCloudIcon)
-            self.headerLabel.text = "Upload Failed!"
-            self.subHeaderLabel.text = "Upload failed due to poor network connectivity."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .downloadFailed:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().downloadCloudIcon)
-            self.headerLabel.text = "Download Failed!"
-            self.subHeaderLabel.text = "Download failed due to poor network connections"
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .verificationFailed:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Verification Failed!"
-            self.subHeaderLabel.text = "Photo & ID doesn’t meet the requirements."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .videoResolutionLow:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().uploadCloudIcon)
-
-            self.headerLabel.text = "Upload Failed!"
-            self.subHeaderLabel.text = "Video resolution is too low."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .fileNotSupported:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().fileIcon)
-
-            self.headerLabel.text = "File not supported!"
-            self.subHeaderLabel.text = "File must be in jpg, png, mp3, mp4, mpeg4 format."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .videoNotSupported:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().fileIcon)
-            self.headerLabel.text = "Video not supported!"
-            self.subHeaderLabel.text = "Video format is not supported. Supported format- mp4, mpeg4 "
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .unknownError:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Unknown Error"
-            self.subHeaderLabel.text = "An unknown error occured during upload."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .maximumPostsReached:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Maximum Post reached!"
-            self.subHeaderLabel.text = "You have reached maximum of posts that is allowed a day. Please try again tomorrow"
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .accountRestricted:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Account Restricted!"
-            self.subHeaderLabel.text = "Your Kwiks Account is restricted. Contact support to reactive your account."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .maxTagReached:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Maximum Tag Reached!"
-            self.subHeaderLabel.text = "You can tag maximum 20 kwiks user in your video."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .largeImage:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Image is too large."
-            self.subHeaderLabel.text = "Image exceeded maximum file size 8MB. Please try again with a smaller image."
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .userAccountNotFound:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "This user account is not found"
-            self.subHeaderLabel.text = "Account of this user may deleted/ suspended/ restricted by the kwiks."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .loginFailed:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Login Failed!"
-            self.subHeaderLabel.text = "Your user id/password are not matched. Please try again with correct credential."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .accessDenied:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Access Denied!"
-            self.subHeaderLabel.text = "This profile is in private mode. You cann’t access this profile."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .soundNotWorking:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().soundBrokenIcon)
-            self.headerLabel.text = "Sound not working!"
-            self.subHeaderLabel.text = "Please try with uploading / choosing another sound from list"
-            self.confirmationButton.setTitle("Retry", for: .normal)
-            
-        case .emailNotVerified:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailNotVerified)
-            self.headerLabel.text = "Email is not verified!"
-            self.subHeaderLabel.text = "Please verify your email to keep your account safe."
-            self.confirmationButton.setTitle("Verify Now", for: .normal)
-            
-        case .emailVerified:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailVerified)
-            self.headerLabel.text = "Email verified!"
-            self.subHeaderLabel.text = "Your email account is verified successfully."
+            self.headerLabel.text = header
+            self.subHeaderLabel.text = body
             self.confirmationButton.setTitle("Okay", for: .normal)
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
+        } else {
             
-        case .verifyPhoneNumber:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().phoneNotVerified)
-            self.headerLabel.text = "Verify Phone Number!"
-            self.subHeaderLabel.text = "Please verify your email to keep your account safe."
-            self.confirmationButton.setTitle("Verify Now", for: .normal)
+            switch popupType! {//unwrapped above
+                
+            case .underThirteen:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().underAgeIcon)
+                self.headerLabel.text = "Hey! You’re Under 13"
+                self.subHeaderLabel.text = "Please come back when you’re 13. If you entered you’re age incorrectly, please correct it."
+                self.confirmationButton.setTitle("Ok", for: .normal)
+               
+            case .updateKwiks:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().kwiksLogo)
+                self.headerLabel.text = "Update Kwiks"
+                self.subHeaderLabel.text = "Kwiks app version is too low. To continue, update to the latest version of the app."
+                self.confirmationButton.setTitle("Update Now", for: .normal)
+               
+                
+            case .ageRestriction:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().kwiksLogo)
+                self.headerLabel.text = "Feature is not available"
+                self.subHeaderLabel.text = "This feature is not available for your account due to the age restriction."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+            case .sendingFailed:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailIcon)
+                self.headerLabel.text = "Sending Failed!"
+                self.subHeaderLabel.text = "Sending Failed. Please try again."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+                
+            case .permissionNeeded:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Permission Needed!"
+                self.subHeaderLabel.text = "Kwiks need to permission to access files and photos."
+                self.confirmationButton.setTitle("Go to settings", for: .normal)
+               
+                
+            case .uploadFailed:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().uploadCloudIcon)
+                self.headerLabel.text = "Upload Failed!"
+                self.subHeaderLabel.text = "Upload failed due to poor network connectivity."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+              
+            case .downloadFailed:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().downloadCloudIcon)
+                self.headerLabel.text = "Download Failed!"
+                self.subHeaderLabel.text = "Download failed due to poor network connections"
+                self.confirmationButton.setTitle("Retry", for: .normal)
+               
+                
+            case .verificationFailed:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Verification Failed!"
+                self.subHeaderLabel.text = "Photo & ID doesn’t meet the requirements."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+               
+                
+            case .videoResolutionLow:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().uploadCloudIcon)
+                
+                self.headerLabel.text = "Upload Failed!"
+                self.subHeaderLabel.text = "Video resolution is too low."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+              
+                
+            case .fileNotSupported:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().fileIcon)
+                
+                self.headerLabel.text = "File not supported!"
+                self.subHeaderLabel.text = "File must be in jpg, png, mp3, mp4, mpeg4 format."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+               
+                
+            case .videoNotSupported:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().fileIcon)
+                self.headerLabel.text = "Video not supported!"
+                self.subHeaderLabel.text = "Video format is not supported. Supported format- mp4, mpeg4 "
+                self.confirmationButton.setTitle("Retry", for: .normal)
+               
+                
+            case .unknownError:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Unknown Error"
+                self.subHeaderLabel.text = "An unknown error occured during upload."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+               
+                
+            case .maximumPostsReached:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Maximum Post reached!"
+                self.subHeaderLabel.text = "You have reached maximum of posts that is allowed a day. Please try again tomorrow"
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+                
+            case .accountRestricted:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Account Restricted!"
+                self.subHeaderLabel.text = "Your Kwiks Account is restricted. Contact support to reactive your account."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+                
+            case .maxTagReached:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Maximum Tag Reached!"
+                self.subHeaderLabel.text = "You can tag maximum 20 kwiks user in your video."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+                
+            case .largeImage:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Image is too large."
+                self.subHeaderLabel.text = "Image exceeded maximum file size 8MB. Please try again with a smaller image."
+                self.confirmationButton.setTitle("Retry", for: .normal)
+              
+                
+            case .userAccountNotFound:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "This user account is not found"
+                self.subHeaderLabel.text = "Account of this user may deleted/ suspended/ restricted by the kwiks."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+                
+                
+            case .loginFailed:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Login Failed!"
+                self.subHeaderLabel.text = "Your user id/password are not matched. Please try again with correct credential."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+                
+            case .accessDenied:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Access Denied!"
+                self.subHeaderLabel.text = "This profile is in private mode. You cann’t access this profile."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+            case .soundNotWorking:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().soundBrokenIcon)
+                self.headerLabel.text = "Sound not working!"
+                self.subHeaderLabel.text = "Please try with uploading / choosing another sound from list"
+                self.confirmationButton.setTitle("Retry", for: .normal)
+              
+                
+            case .emailNotVerified:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailNotVerified)
+                self.headerLabel.text = "Email is not verified!"
+                self.subHeaderLabel.text = "Please verify your email to keep your account safe."
+                self.confirmationButton.setTitle("Verify Now", for: .normal)
+               
+                
+            case .emailVerified:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().emailVerified)
+                self.headerLabel.text = "Email verified!"
+                self.subHeaderLabel.text = "Your email account is verified successfully."
+                self.confirmationButton.setTitle("Okay", for: .normal)
+              
+            case .verifyPhoneNumber:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().phoneNotVerified)
+                self.headerLabel.text = "Verify Phone Number!"
+                self.subHeaderLabel.text = "Please verify your email to keep your account safe."
+                self.confirmationButton.setTitle("Verify Now", for: .normal)
+              
+                
+            case .phoneNumberVerified:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().phoneVerified)
+                self.headerLabel.text = "Phone number verified!"
+                self.subHeaderLabel.text = "Your phone number  is verified successfully."
+                self.confirmationButton.setTitle("Okay", for: .normal)
+              
+                
+            case .incorrectPassword:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().incorrectPasswordIcon)
+                self.headerLabel.text = "Incorrect Password!"
+                self.subHeaderLabel.text = "The password is not correct. Please try again."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+                
+            case .incorrectUsername:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().incorrectPasswordIcon)
+                self.headerLabel.text = "Incorrect Username"
+                self.subHeaderLabel.text = "The username is not correct. Please try again."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+             
+                
+            case .failedTransaction:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().hardFailIcon)
+                self.headerLabel.text = "Your transaction has failed."
+                self.subHeaderLabel.text = "Your payment request was declined by your bank. Please try again or use a different payment method to complete the payment."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+                
+            case .cardNotSupported:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().cardNotSupported)
+                self.headerLabel.text = "Card Not Supported!"
+                self.subHeaderLabel.text = "This card is not supported. Please try using MasterCard, Visa, Amex, Mestro."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+                
+            case .insufficientBalanceHard:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().hardFailIcon)
+                self.headerLabel.text = "Insufficient Balance!"
+                self.subHeaderLabel.text = "You don’t have enough balance to boost your video. Add balance to your wallet and then try again."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+            case .insufficientBalanceLight:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().moneyWalletIcon)
+                self.headerLabel.text = "Insufficient Balance!"
+                self.subHeaderLabel.text = "You don’t have enough balance to boost your video. Add balance to your wallet and then try again."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+              
+                
+            case .paymentDeclined:
+                
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().moneyWalletIcon)
+                self.headerLabel.text = "Payment Declined!"
+                self.subHeaderLabel.text = "Your transaction has declined by your card issuer bank. Please contact with your bank or try using another card."
+                self.confirmationButton.setTitle("Continue", for: .normal)
+               
+                
+            case .loginToAccess:
+                self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
+                self.headerLabel.text = "Login to access!"
+                self.subHeaderLabel.text = "You must need to login to access all features"
+                self.confirmationButton.setTitle("Login Now", for: .normal)
             
-        case .phoneNumberVerified:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().phoneVerified)
-            self.headerLabel.text = "Phone number verified!"
-            self.subHeaderLabel.text = "Your phone number  is verified successfully."
-            self.confirmationButton.setTitle("Okay", for: .normal)
-            
-        case .incorrectPassword:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().incorrectPasswordIcon)
-            self.headerLabel.text = "Incorrect Password!"
-            self.subHeaderLabel.text = "The password is not correct. Please try again."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .incorrectUsername:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().incorrectPasswordIcon)
-            self.headerLabel.text = "Incorrect Username"
-            self.subHeaderLabel.text = "The username is not correct. Please try again."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .failedTransaction:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().hardFailIcon)
-            self.headerLabel.text = "Your transaction has failed."
-            self.subHeaderLabel.text = "Your payment request was declined by your bank. Please try again or use a different payment method to complete the payment."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .cardNotSupported:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().cardNotSupported)
-            self.headerLabel.text = "Card Not Supported!"
-            self.subHeaderLabel.text = "This card is not supported. Please try using MasterCard, Visa, Amex, Mestro."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .insufficientBalanceHard:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().hardFailIcon)
-            self.headerLabel.text = "Insufficient Balance!"
-            self.subHeaderLabel.text = "You don’t have enough balance to boost your video. Add balance to your wallet and then try again."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .insufficientBalanceLight:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().moneyWalletIcon)
-            self.headerLabel.text = "Insufficient Balance!"
-            self.subHeaderLabel.text = "You don’t have enough balance to boost your video. Add balance to your wallet and then try again."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .paymentDeclined:
-            
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().moneyWalletIcon)
-            self.headerLabel.text = "Payment Declined!"
-            self.subHeaderLabel.text = "Your transaction has declined by your card issuer bank. Please contact with your bank or try using another card."
-            self.confirmationButton.setTitle("Continue", for: .normal)
-            
-        case .loginToAccess:
-            self.headerIcon.image = UIImage.init(fromPodAssetName: ImageKit().warningHollowIcon)
-            self.headerLabel.text = "Login to access!"
-            self.subHeaderLabel.text = "You must need to login to access all features"
-            self.confirmationButton.setTitle("Login Now", for: .normal)
+            }
         }
     }
     
     public func engagePopup() {
         
-        self.headerLabel.font = UIFont(name: FontKit().segoeBold, size: 20)
-        self.subHeaderLabel.font = UIFont(name: FontKit().segoeRegular, size: 16)
-        self.confirmationButton.titleLabel?.font = UIFont(name: FontKit().segoeRegular, size: 18)
-
-        let height = self.rootController?.view.frame.height,
-            width = self.rootController?.view.frame.width
-        
-        //nil check prior
-        if height != nil && width != nil {
-            self.screenWidth = width!
-            self.screenHeight = height!
-            self.rootController?.view.addSubview(self.smokeScreen)
-            self.smokeScreen.frame = CGRect(x: 0, y: 0, width: width!, height: height!)
-            self.smokeScreen.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.dismiss)))
-            self.presentPopup()
-
-        } else {
-            Print().dynamicPrint(message: "🔴 COCOAPOD ERROR: NIL - LET KWIKS DEV LIBRARY MAGICIAN KNOW - SERIAL (64574)")
+        DispatchQueue.main.async {
+            
+            self.headerLabel.font = UIFont(name: FontKit().segoeBold, size: 20)
+            self.subHeaderLabel.font = UIFont(name: FontKit().segoeRegular, size: 16)
+            self.confirmationButton.titleLabel?.font = UIFont(name: FontKit().segoeRegular, size: 18)
+            
+            let height = self.rootController?.view.frame.height,
+                width = self.rootController?.view.frame.width
+            
+            //nil check prior
+            if height != nil && width != nil {
+                self.screenWidth = width!
+                self.screenHeight = height!
+                self.rootController?.view.addSubview(self.smokeScreen)
+                self.smokeScreen.frame = CGRect(x: 0, y: 0, width: width!, height: height!)
+                self.smokeScreen.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.dismiss)))
+                self.presentPopup()
+                
+            } else {
+                Print().dynamicPrint(message: "🔴 COCOAPOD ERROR: NIL - LET KWIKS DEV LIBRARY MAGICIAN KNOW - SERIAL (64574)")
+            }
         }
     }
     
@@ -441,95 +502,157 @@ public class KwiksSystemPopups : NSObject {
         case .updateKwiks://product page
             self.dynamicPopUpContainer.openUrl(passedUrlString: URLKit().product_page_url)
             self.perform(#selector(self.dismiss), with: nil, afterDelay: 0.75)
+            self.responseType = .sendToAppStoreURL
+            self.callback?(.sendToAppStoreURL)
             
         case .ageRestriction://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .sendingFailed://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .uploadFailed://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .downloadFailed://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .verificationFailed://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .videoResolutionLow://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .fileNotSupported://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .videoNotSupported://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .unknownError://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .maximumPostsReached://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .accountRestricted://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .maxTagReached://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .largeImage://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .userAccountNotFound://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .loginFailed://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .accessDenied://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .soundNotWorking://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .emailNotVerified://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .emailVerified://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .verifyPhoneNumber://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .phoneNumberVerified://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .incorrectPassword://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .incorrectUsername://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .failedTransaction://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .cardNotSupported://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .insufficientBalanceHard://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .insufficientBalanceLight://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .paymentDeclined://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .loginToAccess://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .underThirteen://close
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
             self.dismiss()
             
         case .permissionNeeded:
@@ -550,6 +673,9 @@ public class KwiksSystemPopups : NSObject {
             }
 
         default: Print().dynamicPrint(message: "🔴 DEFAULT SWITCH FOR POPUP TYPE DECISION")
+            self.responseType = .dismiss
+            self.callback?(.dismiss)
+            self.dismiss()//this is the custom popup
 
         }
     }
