@@ -4,24 +4,24 @@
 import PackageDescription
 
 let package = Package(
-    name: "KwiksPopups",
+    name: "kwiks-ios-popups-library",
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "KwiksPopups",
-            targets: ["KwiksPopups"]),
+            name: "kwiks-ios-popups-library",
+            targets: ["kwiks-ios-popups-library"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "KwiksPopups",
+            name: "kwiks-ios-popups-library",
             dependencies: [],
             resources: [
                 .process("Assets")
             ]),
         .testTarget(
             name: "KwiksPopupsTests",
-            dependencies: ["KwiksPopups"]),
+            dependencies: ["kwiks-ios-popups-library"]),
     ]
 )
