@@ -5,7 +5,7 @@
 //  Created by Charlie Arcodia on 3/26/23.
 //
 
-import Foundation
+import UIKit
 
 struct URLKit {
     static let shared = URLKit()
